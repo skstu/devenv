@@ -1,0 +1,96 @@
+import("//build/tools/cmd.gni")
+
+cmd("icu") {
+  dir_source = system_env.ROOT_DIR + "/3rdparty/icu/icu4c/source"
+  dir_install =
+      system_env.ROOT_DIR +
+      "/3rdparty/installed/${current_os}/${compile_configure_type}/icu"
+  inv_terminal = []
+  inv_script_configure = []
+
+  if (is_win) {
+    if (is_debug) {
+      inv_script_configure += [
+        "cd ${dir_source}",
+        "&&",
+        "bash runConfigureICU",
+        "MinGW",
+        "--enable-debug",
+        "--disable-release",
+        "--prefix=${dir_install}",
+        "--enable-static",
+        "--disable-shared",
+        "--disable-renaming",
+        "&&",
+        "cd config",
+        "&&",
+        "del mh-unknown",
+        "&&",
+        "copy mh-cygwin64 mh-unknown",
+        "&&",
+        "cd ..",
+      ]
+    } else {
+      inv_script_configure += [
+        "cd ${dir_source}",
+        "&&",
+        "bash runConfigureICU",
+        "MinGW",
+        "--prefix=${dir_install}",
+        "--enable-static",
+        "--disable-shared",
+        "--disable-renaming",
+        "&&",
+        "cd config",
+        "&&",
+        "del mh-unknown",
+        "&&",
+        "copy mh-cygwin64 mh-unknown",
+        "&&",
+        "cd ..",
+      ]
+    }
+  } else {
+    if (is_debug) {
+      inv_script_configure += [
+        "cd ${dir_source}",
+        "&&",
+        "./runConfigureICU",
+        "Linux",
+        "--enable-debug",
+        "--disable-release",
+        "--prefix=${dir_install}",
+        "--enable-static",
+        "--disable-shared",
+        "--disable-renaming",
+      ]
+    } else {
+      inv_script_configure += [
+        "cd ${dir_source}",
+        "&&",
+        "./runConfigureICU",
+        "Linux",
+        "--prefix=${dir_install}",
+        "--enable-static",
+        "--disable-shared",
+        "--disable-renaming",
+      ]
+    }
+  }
+
+  inv_script_build = [
+    "cd ${dir_source}",
+    "&&",
+    "make -j4",
+  ]
+  inv_script_clean = [
+    "cd ${dir_source}",
+    "&&",
+    "make clean",
+  ]
+  inv_script_install = [
+    "cd ${dir_source}",
+    "&&",
+    "make install",
+  ]
+}
